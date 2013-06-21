@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% load staticfiles %}
+
+{% block extra_head %}
+
+<style type="text/css">
+.table td {
+  text-align: center;
+  vertical-align: middle;
+}
+
+.table th {
+  text-align: center;
+  vertical-align: middle;
+}
+</style>
+
+<script>
+function CopyToClipboard (text) {
+  window.prompt ("Copy to clipboard: Ctrl+C, Enter", text);
+}
+
+function Load(url){
+  window.location.href = url;
+}
+
+
+function WaitMessage(message){
+  $('#myModal').modal({show: true})
+}
+
+function timedRefresh(timeoutPeriod) {
+  setTimeout("location.reload(true);",timeoutPeriod);
+}
+
+timedRefresh(60000)
+
+</script>
+{% endblock %}
+
+{% block content %}
+
+ 
+<!-- Modal -->
+<div id="myModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-body">
+    <p>Waiting...</p>
+  </div>
+</div>
+
+<div class="container">
+	<div class="row">
+	  <div class="span8">
+		<h2>Workstations</h2>
+		  <a href="." class="btn btn-small"><i class="icon-black icon-refresh"></i> Refresh</a>  <button class="btn btn-small btn-success" onclick="Load('/create/')">Create New Workstation</button>
+		<hr>
+		<table class="table table-hover table-bordered ">
+			<thead>
+			  <tr>
+			    <th>Name</th>
+			    <th>Power</th>
+			    <th>Connect</th>
+			    <th>Configure</th>            
+			  </tr>
+			</thead>
+			<tbody>        
+			
+			
+			{% for instance in instances %}
+			<tr {% if instance.state == "running" %} class="success" {% endif %}>
+			  <td>
+			    <h4>{{instance.name}} <small> <span class="success">{{instance.state}}</small></span></h4>
+			  </td>
+        <td>            
+			     {% if instance.state == "running" %}
+			       <button class="btn btn-small" onclick="Load('/stop/{{instance.id}}')" ><i class="icon-black icon-off"></i></button> 
+		       {% endif %}
+		       
+			  </td>
+			  <td>
+			    {% if instance.state == "running" or instance.state == "stopped" %}
+			  	<div class="btn-group">
+						<button class="btn" onclick="Load('/connect/{{instance.id}}')">Connect</button>						
+					</div>
+					{% endif %}
+			  
+			  </td>          
+			  <td>
+				  <div class="btn-group">
+					  <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+					    <i class="icon-black icon-wrench"></i>
+					    <span class="caret"></span>
+					  </a>
+					  <ul class="dropdown-menu">
+					    {% if instance.state == "running" %}
+              <li><a href="#" onclick="CopyToClipboard('ssh ubuntu@{{instance.hostname}}')">SSH</a></li>
+              {% endif %}
+              <li class="divider"></li>
+              <li><a href="/destroy/{{instance.id}}">Destroy</a></li>
+            
+					  </ul>
+					</div>
+			  </td>
+			</tr>
+			{% endfor %}        
+			</tbody>
+		</table>
+	  </div> <!-- span8 -->	  	
+	</div> <!-- row -->	
+	<hr>
+	<div class="row">
+	<div class="span4">
+  
+    </div>
+	</div>
+</div> <!-- container -->
+
+
+{% endblock %}
