@@ -1,10 +1,31 @@
 # Django settings for server project.
 import os
-
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.realpath(__file__))) 
 
-DEBUG = True
+################################################################################
+# Defaults should be overridden in a local_settings.py file
+################################################################################
+DEBUG = False
 TEMPLATE_DEBUG = DEBUG
+EMAIL_HOST = ''
+EMAIL_HOST_USER = ''
+EMAIL_HOST_PASSWORD = ''
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3', 
+        'NAME': '/tmp/test_db.sqlite3',               
+    }
+}
+
+# Make this unique, and don't share it with anybody.
+SECRET_KEY = '^d)fk-cy64wvx3+yglojru&g*76417s^+^ri!$)1m05s-!^#yc'
+
+# Hosts/domain names that are valid for this site; required if DEBUG is False
+# See https://docs.djangoproject.com/en/1.5/ref/settings/#allowed-hosts
+ALLOWED_HOSTS = []
+
+##################
 
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
@@ -13,28 +34,11 @@ ADMINS = (
 MANAGERS = ADMINS
 
 EMAIL_USE_TLS = True
-EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
-EMAIL_HOST_USER = ''
-EMAIL_HOST_PASSWORD = ''
 
 LOGIN_REDIRECT_URL = '/workstations'
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': '/tmp/test_db.sqlite3',  # Or path to database file if using sqlite3.        
-        # The following settings are not used with sqlite3:
-        'USER': '',
-        'PASSWORD': '',
-        'HOST': '',                      # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
-        'PORT': '',                      # Set to empty string for default.
-    }
-}
 
-# Hosts/domain names that are valid for this site; required if DEBUG is False
-# See https://docs.djangoproject.com/en/1.5/ref/settings/#allowed-hosts
-ALLOWED_HOSTS = []
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -86,11 +90,9 @@ STATICFILES_DIRS = (
     
 )
 
-
 FIXTURE_DIRS = (
   os.path.join(BASE_DIR, "fixtures"),
 )
-
 
 # List of finder classes that know how to find static files in
 # various locations.
@@ -100,8 +102,6 @@ STATICFILES_FINDERS = (
 #    'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
-# Make this unique, and don't share it with anybody.
-SECRET_KEY = '^d)fk-cy64wvx3+yglojru&g*76417s^+^ri!$)1m05s-!^#yc'
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
@@ -129,24 +129,20 @@ TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    '/home/ubuntu/git/iwct-webclient/server/webclient/templates',
-    
+    os.path.join(BASE_DIR , 'webclient/templates')  
 )
 
 INSTALLED_APPS = (
+    'webclient',
+    'registration',    
+    'bootstrap_toolkit',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    # Uncomment the next line to enable the admin:
-    'django.contrib.admin',
-    'registration',
-    'webclient',
-    'bootstrap_toolkit',
-    # Uncomment the next line to enable admin documentation:
-    # 'django.contrib.admindocs',
+    'django.contrib.admin',    
 )
 
 ACCOUNT_ACTIVATION_DAYS = 7
@@ -179,3 +175,7 @@ LOGGING = {
         },
     }
 }
+
+# pull in local settings if present
+if os.path.exists('local_settings.py'):
+  from local_settings import *

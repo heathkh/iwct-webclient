@@ -1,0 +1,9 @@
+---   
+- hosts: all
+  sudo: True
+  vars_files:
+    - settings.yml
+   
+- include: setup_core.yml
+- include: setup_mysql.yml
+           
