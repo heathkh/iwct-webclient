@@ -7,8 +7,9 @@
     repo_url: https://github.com/heathkh/iwct-webclient.git
     repo_remote: origin
     repo_version: master
-    webapps_dir: /srv/webapps
-    wsgi_file: iwct-webclient/server/server/wsgi.py
+    webapps_dir: /srv/webapps    # root path on server where web apps are stored
+    app_base: /server/ # path of django BASE_DIR relative to /{{webapps_dir}}/{{app_name}}/src/, usually the django project name
+    wsgi_file: /server/wsgi.py # path of the wsgi.py relative to {{app_base}}  
     wsgi_callable: application
 
   tasks:
