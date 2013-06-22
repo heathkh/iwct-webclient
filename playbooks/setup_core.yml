@@ -1,6 +1,6 @@
 ---
 
-- hosts: all
+- hosts: all  
   sudo: True
   tasks:
     #- name: Update all packages to the latest version
@@ -10,7 +10,7 @@
     #  action: apt_repository repo=ppa:nginx/stable state=present
 
     - name: install common packages needed for python application development
-      action: apt pkg=$item
+      action: apt pkg=$item      
       with_items:
         #- libmysqlclient-dev
         #- libxml2-dev
@@ -36,7 +36,7 @@
         - virtualenv
         - supervisor
         - uwsgi # needs build-essential, python-dev
-
+        
     - name: remove default nginx site
       file: path=/etc/nginx/sites-enabled/default state=absent
 
