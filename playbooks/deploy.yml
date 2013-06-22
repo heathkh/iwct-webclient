@@ -1,6 +1,7 @@
 ---
 
 - hosts: all  
+  sudo: True
   vars:    
     webapps_dir: /srv/webapps    # root path on server where web apps are stored
     repo_url: https://github.com/heathkh/iwct-webclient.git
