@@ -17,6 +17,7 @@
         - mysql-client
         - python-dev
         - python-setuptools
+        - python-mysqldb
         - git-core
         - nginx
         - ntp

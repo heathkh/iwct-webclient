@@ -49,8 +49,11 @@
       action: file src=/etc/nginx/sites-available/${app_name}.conf dest=/etc/nginx/sites-enabled/${app_name}.conf state=link
       sudo: True
      
-    # create database user
-    - name: create default db users
+     
+    - name: create default db
+      mysql_db: login_user=root login_password={{mysql_root_password}} db={{app_name}} state=present
+    
+    - name: create db user
       mysql_user: login_user=root login_password={{mysql_root_password}} name={{app_name}} password={{app_db_password}} priv=*.*:ALL state=present
      
     - name: configure django app with local settings
