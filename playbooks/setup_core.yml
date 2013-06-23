@@ -12,14 +12,11 @@
     - name: install common packages needed for python application development
       action: apt pkg=$item      
       with_items:
-        #- libmysqlclient-dev
-        #- libxml2-dev
+        - libmysqlclient-dev
+        - libxml2-dev
         - mysql-client
         - python-dev
         - python-setuptools
-        - python-imaging
-        - python-mysqldb
-        - python-django
         - git-core
         - nginx
         - ntp
