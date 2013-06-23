@@ -176,6 +176,5 @@ LOGGING = {
     }
 }
 
-# pull in local settings if present
-if os.path.exists('local_settings.py'):
-  from local_settings import *
+
+from local_settings import *
