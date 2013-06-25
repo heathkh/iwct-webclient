@@ -5,9 +5,14 @@
 
  <!-- Main hero unit for a primary marketing message or call to action -->
       <div class="hero-unit">
-        <h1>Hello, world!</h1>
-        <p>This is a template for a simple marketing or informational website. It includes a large callout called the hero unit and three supporting pieces of content. Use it as a starting point to create something more unique.</p>
-        <p><a href="#" class="btn btn-primary btn-large">Learn more &raquo;</a></p>
+        <h1>Your cloud workstation awaits!</h1>
+        {% if user.is_authenticated %}
+          <p>Welcome back...</p>
+          <p><a href="{% url 'workstations' %}" class="btn btn-primary btn-large">See your workstations &raquo;</a></p>
+        {% else  %}
+          <p>Login or register to get started building <a href="http://graphics.stanford.edu/imagewebs/">Image Webs</a> with the <a href="https://image-web-cloud-tools.readthedocs.org/en/latest/">Image Webs Cloud Toolkit.</a></p>
+          <p><a href="{% url 'auth_login' %}" class="btn btn-primary btn-large">Login &raquo;</a></p>
+        {% endif %}
       </div>
 
 
