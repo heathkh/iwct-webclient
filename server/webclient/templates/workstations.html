@@ -91,7 +91,7 @@ function OpenNxClientInstallWindow(){
 			
 			
 			{% for instance in instances %}
-			<tr {% if instance.state == "running" %} class="success" {% endif %}>
+			<tr {% if instance.state == "running" %} class="success" {% elif instance.state == "pending" %} class="warning" {% endif %}>
 			  <td>
 			    <h4>{{instance.name}} <small> <span class="success">{{instance.state}}</small></span></h4>
 			  </td>
