@@ -35,7 +35,29 @@ function timedRefresh(timeoutPeriod) {
   setTimeout("location.reload(true);",timeoutPeriod);
 }
 
-timedRefresh(60000)
+timedRefresh(30000)
+
+
+function OpenNxClientInstallWindow(){
+	var OSName="Unknown OS";
+	if (navigator.appVersion.indexOf("Win")!=-1) OSName="Windows";
+	if (navigator.appVersion.indexOf("Mac")!=-1) OSName="MacOS";
+	if (navigator.appVersion.indexOf("Linux")!=-1) OSName="Linux";
+	
+	// Default points at generic download page
+	var install_nx_client_url = "http://www.nomachine.com/download.php";
+	if (OSName == "Windows") {
+	  install_nx_client_url = "http://www.nomachine.com/download-package.php?Prod_Id=3835"
+	}
+	else if (OSName == "MacOS") {
+	  install_nx_client_url = "http://www.nomachine.com/download-package.php?Prod_Id=3834"
+	}
+	else if (OSName == "Linux") {
+	  install_nx_client_url = "http://www.nomachine.com/download-client-linux.php"
+	}
+  window.open(install_nx_client_url);
+}
+
 
 </script>
 {% endblock %}
@@ -75,17 +97,18 @@ timedRefresh(60000)
 			  </td>
         <td>            
 			     {% if instance.state == "running" %}
-			       <button class="btn btn-small" onclick="Load('/stop/{{instance.id}}')" ><i class="icon-black icon-off"></i></button> 
+			       <button class="btn btn-small" onclick="Load('/stop/{{instance.id}}')" ><i class="icon-black icon-off"></i> Turn Off</button> 
+           {% elif instance.state == "stopped" %}
+             <button class="btn btn-small" onclick="Load('/start/{{instance.id}}')" ><i class="icon-black icon-off"></i> Turn On</button>			       
 		       {% endif %}
 		       
 			  </td>
 			  <td>
-			    {% if instance.state == "running" or instance.state == "stopped" %}
+			    {% if instance.state == "running" %}
 			  	<div class="btn-group">
 						<button class="btn" onclick="Load('/connect/{{instance.id}}')">Connect</button>						
 					</div>
-					{% endif %}
-			  
+					{% endif %}			  
 			  </td>          
 			  <td>
 				  <div class="btn-group">
@@ -107,12 +130,15 @@ timedRefresh(60000)
 			{% endfor %}        
 			</tbody>
 		</table>
-	  </div> <!-- span8 -->	  	
-	</div> <!-- row -->	
-	<hr>
+		<div class="alert alert-info">
+      <b>Hint:</b> After clicking "connect", open the downloaded .nxs file with NX Client. &nbsp;
+      <a class="btn btn-info btn-mini pull-right" href="#" onclick="OpenNxClientInstallWindow()">Get NX Client</a>      
+    </div>		
+	  </div> <!-- span8 -->	
+	</div> <!-- row -->		
+	<hr>	
 	<div class="row">
-	<div class="span4">
-  
+	  <div class="span4">  
     </div>
 	</div>
 </div> <!-- container -->

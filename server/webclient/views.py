@@ -4,13 +4,20 @@ from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django import forms
 from django.http import HttpResponseRedirect
-
+import multiprocessing
 from cirruscluster import core
 from cirruscluster import workstation
 
 import models
 from boto import exception
 
+worker_pool = None
+
+def GetWorkerPool():
+  global worker_pool
+  if not worker_pool:
+    worker_pool = multiprocessing.Pool(processes=4)  # start 4 worker processes
+  return worker_pool
 
 def GetManager(request):
   iam_credentials = request.user.iamcredentials
@@ -52,6 +59,12 @@ def Stop(request, instance_id):
   GetManager(request).StopInstance(instance_id)  
   return HttpResponseRedirect('/workstations')
 
+@login_required(login_url='/accounts/login/')
+def Start(request, instance_id):
+  instance_id = instance_id.encode('ascii', 'ignore')
+  GetManager(request).StartInstance(instance_id)  
+  return HttpResponseRedirect('/workstations')
+
 
 @login_required(login_url='/accounts/login/')
 def Connect(request, instance_id):
@@ -59,12 +72,17 @@ def Connect(request, instance_id):
   manager = GetManager(request)
   conn_config_data = manager.CreateRemoteSessionConfig(instance_id)
   response = HttpResponse(conn_config_data, content_type='application/nx-session')
-  response['Content-Disposition'] = 'attachment; filename="connect.nxs"'
+  info = manager.GetInstanceInfo(instance_id)
+  safe_name = info.name
+  safe_name = safe_name.replace('_', '-')
+  safe_name = safe_name.replace('=', '-')
+  safe_name = safe_name.replace(',', '-')
+  response['Content-Disposition'] = 'attachment; filename="%s.nxs"' % (safe_name)  
   return response
 
 
 class DestroyConfirmForm(forms.Form):
-  confirm = forms.CharField(max_length=100)
+  confirm = forms.CharField(max_length=100, label="")
   
   def clean_confirm(self):
     data = self.cleaned_data['confirm']
@@ -88,8 +106,8 @@ def Destroy(request, instance_id):
 
 
 class SetupAwsCredentialsForm(forms.Form):
-  aws_key_id = forms.CharField(max_length=100)
-  aws_key_secret = forms.CharField(max_length=100)
+  aws_key_id = forms.CharField(min_length=20, max_length=20, label='Key ID', help_text='&nbsp; &nbsp; <span style="font-size: 10px; color: gray;">Example Key ID: AKIBJXJDW89GBT46DMGA</span>')
+  aws_key_secret = forms.CharField(min_length=40, max_length=40, label='Key Secret', help_text='&nbsp; &nbsp; <span style="font-size: 10px; color: gray;">Example Key Secret: q73vQ2T5rGe6bcrRTfTXyaZgrdT/53WVdysqLoYx</span>')
  
 
 def SetupAwsCredentials(request):
@@ -125,8 +143,28 @@ class CreateWorkstationForm(forms.Form):
     ('c1.xlarge', 'c1.xlarge'),  
   )
   instance_type = forms.ChoiceField(choices=INSTANCE_TYPE_CHOICES)
-  
 
+class CreateWorkstationRunner():
+  def __init__(self, manager, name, instance_type, ubuntu_release_name, 
+               mapr_version, ami_release_name, ami_owner_id):
+    self.manager = manager
+    self.name = name
+    self.instance_type = instance_type
+    self.ubuntu_release_name = ubuntu_release_name
+    self.mapr_version = mapr_version
+    self.ami_release_name = ami_release_name
+    self.ami_owner_id = ami_owner_id
+    return
+  
+  def __call__(self):
+    self.manager.CreateInstance(self.name, self.instance_type, 
+                                self.ubuntu_release_name, 
+                                self.mapr_version, self.ami_release_name, 
+                                self.ami_owner_id)
+    return
+    
+ 
+  
 def CreateWorkstation(request):
   form = CreateWorkstationForm(initial={'name': 'my_workstation', 'instance_type': 'c1.xlarge'}) # An unbound form
   
@@ -139,24 +177,50 @@ def CreateWorkstation(request):
       manager = GetManager(request)
       ubuntu_release_name = 'precise'
       mapr_version = 'v2.1.3'
-      success = False      
-      try:
-        manager.CreateInstance(name, 
-                               instance_type,
-                               ubuntu_release_name, 
-                               mapr_version,
-                               core.default_ami_release_name, 
-                               core.default_ami_owner_id)
-        success = True
-      except RuntimeError as e:
-        messages.error(request, '%s' % (e))
-      
-      if success:
-        messages.success(request, 'A new workstation was created: %s' % (name))
-        
+      runner = CreateWorkstationRunner(manager, 
+                                       name, 
+                                       instance_type,
+                                       ubuntu_release_name, 
+                                       mapr_version,
+                                       core.default_ami_release_name, 
+                                       core.default_ami_owner_id)
+      GetWorkerPool().apply_async(runner)
+      messages.success(request, 'Your new workstation (%s) is starting up...' % (name))
       return HttpResponseRedirect('/workstations/') # Redirect after POST
   
-  return render(request, 'create_workstation.html', {'form': form,})    
+  return render(request, 'create_workstation.html', {'form': form,})      
+
+#def CreateWorkstation(request):
+#  form = CreateWorkstationForm(initial={'name': 'my_workstation', 'instance_type': 'c1.xlarge'}) # An unbound form
+#  
+#  if request.method == 'POST': # If the form has been submitted...
+#    form = CreateWorkstationForm(request.POST) # A form bound to the POST data
+#    if form.is_valid(): # All validation rules pass
+#      # Process the data in form.cleaned_data
+#      name = form.cleaned_data['name']
+#      instance_type = form.cleaned_data['instance_type']
+#      manager = GetManager(request)
+#      ubuntu_release_name = 'precise'
+#      mapr_version = 'v2.1.3'
+#      success = False      
+#      
+#      try:
+#        manager.CreateInstance(name, 
+#                               instance_type,
+#                               ubuntu_release_name, 
+#                               mapr_version,
+#                               core.default_ami_release_name, 
+#                               core.default_ami_owner_id)
+#        success = True
+#      except RuntimeError as e:
+#        messages.error(request, '%s' % (e))
+#      
+#      if success:
+#        messages.success(request, 'A new workstation was created: %s' % (name))
+#        
+#      return HttpResponseRedirect('/workstations/') # Redirect after POST
+#  
+#  return render(request, 'create_workstation.html', {'form': form,})    
 
 
 
