@@ -76,15 +76,15 @@ function OpenNxClientInstallWindow(){
 	<div class="row">
 	  <div class="span8">
 		<h2>Workstations</h2>
-		  <a href="." class="btn btn-small"><i class="icon-black icon-refresh"></i> Refresh</a>  <button class="btn btn-small btn-success" onclick="Load('/create/')">Create New Workstation</button>
-		<hr>
+		  <a href="." class="btn btn-small"><i class="icon-black icon-refresh"></i> Refresh</a>  <button class="btn btn-small btn-success" onclick="Load('/create/')"><i class="icon-plus icon-white"></i>&nbsp; Create New Workstation</button>
+		<div style="height: 15px;"></div>
 		<table class="table table-hover table-bordered ">
 			<thead>
 			  <tr>
 			    <th>Name</th>
 			    <th>Power</th>
 			    <th>Connect</th>
-			    <th>Configure</th>            
+			    <th>Options</th>            
 			  </tr>
 			</thead>
 			<tbody>        
@@ -106,14 +106,14 @@ function OpenNxClientInstallWindow(){
 			  <td>
 			    {% if instance.state == "running" %}
 			  	<div class="btn-group">
-						<button class="btn" onclick="Load('/connect/{{instance.id}}')">Connect</button>						
+						<button class="btn" onclick="Load('/connect/{{instance.id}}')"><i class="icon-black icon-share-alt"></i> Connect</button>						
 					</div>
 					{% endif %}			  
 			  </td>          
 			  <td>
 				  <div class="btn-group">
 					  <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
-					    <i class="icon-black icon-wrench"></i>
+					    <i class="icon-black icon-cog"></i>
 					    <span class="caret"></span>
 					  </a>
 					  <ul class="dropdown-menu" style="text-align: left;">					    
@@ -137,7 +137,6 @@ function OpenNxClientInstallWindow(){
     </div>		
 	  </div> <!-- span8 -->	
 	</div> <!-- row -->		
-	<hr>	
 	<div class="row">
 	  <div class="span4">  
     </div>
