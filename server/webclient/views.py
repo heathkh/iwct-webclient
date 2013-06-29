@@ -105,6 +105,32 @@ def Destroy(request, instance_id):
   return render(request, 'destroy_workstation.html', {'instance_id': instance_id, 'form': form,})          
 
 
+
+class AddStorageForm(forms.Form):
+  new_size_gb = forms.DecimalField(max_digits=4, min_value=10, max_value=500, decimal_places=0, label="Desired new size in GB")
+  
+  def clean_new_size_gb(self):
+    data = self.cleaned_data['new_size_gb']
+    # TODO raise validation exception if new size is smaller than current size (only expanding is currently supported)
+    return data
+  
+  
+@login_required(login_url='/accounts/login/')
+def AddStorage(request, instance_id):
+  form = AddStorageForm() # An unbound form
+  instance_id = instance_id.encode('ascii', 'ignore')
+  if request.method == 'POST': # If the form has been submitted...
+    form = AddStorageForm(request.POST) # A form bound to the POST data
+    if form.is_valid(): # All validation rules pass
+      manager = GetManager(request)
+      new_size_gb = int(form.cleaned_data['new_size_gb'])
+      manager.ResizeRootVolumeOfInstance(instance_id, new_size_gb)
+      return HttpResponseRedirect('/workstations/') # Redirect after POST
+  
+  return render(request, 'add_storage.html', {'instance_id': instance_id, 'form': form,})          
+
+
+
 class SetupAwsCredentialsForm(forms.Form):
   aws_key_id = forms.CharField(min_length=20, max_length=20, label='Key ID', help_text='&nbsp; &nbsp; <span style="font-size: 10px; color: gray;">Example Key ID: AKIBJXJDW89GBT46DMGA</span>')
   aws_key_secret = forms.CharField(min_length=40, max_length=40, label='Key Secret', help_text='&nbsp; &nbsp; <span style="font-size: 10px; color: gray;">Example Key Secret: q73vQ2T5rGe6bcrRTfTXyaZgrdT/53WVdysqLoYx</span>')
