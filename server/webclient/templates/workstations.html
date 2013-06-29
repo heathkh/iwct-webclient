@@ -116,14 +116,14 @@ function OpenNxClientInstallWindow(){
 					    <i class="icon-black icon-wrench"></i>
 					    <span class="caret"></span>
 					  </a>
-					  <ul class="dropdown-menu" style="text-align: left;">
+					  <ul class="dropdown-menu" style="text-align: left;">					    
 					    {% if instance.state == "running" %}
-              <li><a href="#" onclick="CopyToClipboard('ssh ubuntu@{{instance.hostname}}')"><i class="icon-briefcase"></i>&nbsp; &nbsp; SSH</a></li>
-              <li><a href="/add_storage/{{instance.id}}"><i class="icon-hdd"></i>&nbsp; &nbsp; Add storage</a></li>
+              <li><a href="#" onclick="CopyToClipboard('ssh ubuntu@{{instance.hostname}}')"><i class="icon-briefcase"></i>&nbsp; &nbsp; SSH</a></li>              
               {% endif %}
+              
+              <li><a href="/add_storage/{{instance.id}}"><i class="icon-hdd"></i>&nbsp; &nbsp; Add storage</a></li>
               <li class="divider"></li>
-              <li><a href="/destroy/{{instance.id}}"><i class="icon-trash"></i>&nbsp; &nbsp; Destroy</a></li>
-            
+              <li><a href="/destroy/{{instance.id}}"><i class="icon-trash"></i>&nbsp; &nbsp; Destroy</a></li>            
 					  </ul>
 					</div>
 			  </td>
