@@ -139,8 +139,10 @@ class SetupAwsCredentialsForm(forms.Form):
     cleaned_data = super(SetupAwsCredentialsForm, self).clean()
     aws_key_id = cleaned_data.get("aws_key_id")
     aws_key_secret = cleaned_data.get("aws_key_secret")
-    if not core.CredentialsValid(aws_key_id, aws_key_secret):
-      raise forms.ValidationError("Invalid AWS Access Key")
+    
+    if aws_key_id and aws_key_secret:
+      if not core.CredentialsValid(aws_key_id, aws_key_secret):
+        raise forms.ValidationError("Invalid AWS Access Key")
     # Always return the full collection of cleaned data.
     return cleaned_data
 
@@ -157,6 +159,7 @@ def SetupAwsCredentials(request):
       key_id, key_secret = workstation.InitCirrusIAMUser(root_aws_id, 
                                                          root_aws_secret)
       
+      #iam_credentials = models.IamCredentials.objects.get(user=request.user)
       iam_credentials, created = models.IamCredentials.objects.get_or_create(user=request.user)
       iam_credentials.iam_key_id = key_id
       iam_credentials.iam_key_secret = key_secret
