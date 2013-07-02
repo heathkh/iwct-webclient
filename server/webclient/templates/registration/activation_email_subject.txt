@@ -1,1 +1,2 @@
-{% load i18n %}{% trans "Account activation on" %} {{ site.name }}
+Image Webs Cloud Toolkit Account Activation
+

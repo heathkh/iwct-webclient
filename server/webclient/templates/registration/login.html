@@ -34,9 +34,11 @@
       <button type="submit" class="btn btn-primary btn-large">Sign in</button>
       <div class ="pull-right">
       <a href="{% url 'auth_password_reset' %}">Forgot password</a> <br> 
-      <a href="{% url 'registration_register' %}">Create new account</a>
+      <!-- <a href="{% url 'registration_register' %}">Create new account</a> -->
       </div>
     </div>  
+    
+    <a class="btn btn-success" href="{% url 'registration_register' %}">Create new account</a>
   </form>
 </div> <!-- /container -->
 
