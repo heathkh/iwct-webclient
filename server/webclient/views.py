@@ -157,7 +157,7 @@ def SetupAwsCredentials(request):
       key_id, key_secret = workstation.InitCirrusIAMUser(root_aws_id, 
                                                          root_aws_secret)
       
-      iam_credentials = models.IamCredentials.objects.get(user=request.user)
+      iam_credentials, created = models.IamCredentials.objects.get_or_create(user=request.user)
       iam_credentials.iam_key_id = key_id
       iam_credentials.iam_key_secret = key_secret
       iam_credentials.save()                  
