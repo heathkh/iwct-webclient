@@ -6,7 +6,7 @@
 {% block extra_head %}
 <style type="text/css">
  .form-signin {
-   max-width: 300px;
+   max-width: 230px;
    padding: 19px 29px 29px;
    margin: 0 auto 20px;
    background-color: #fff;
@@ -26,20 +26,18 @@
 <div class="container">
   <form class="form-signin" method="post" action=".">
     <h2 class="form-signin-heading">Please sign in</h2>    
-    {% csrf_token %} 
-    {{ form | as_bootstrap }}
-    
+    {% csrf_token %}
     <input type="hidden" name="next" value="{{ next }}" />  
-    <div class = "form-actions">
-      <button type="submit" class="btn btn-primary btn-large">Sign in</button>
-      <div class ="pull-right">
-      <a href="{% url 'auth_password_reset' %}">Forgot password</a> <br> 
-      <!-- <a href="{% url 'registration_register' %}">Create new account</a> -->
+      {{ form | as_bootstrap }}      
+      <div class = "form">
+        <button type="submit" class="btn btn-primary btn-large">Sign in</button>
+        <a class="pull-right" href="{% url 'auth_password_reset' %}">Forgot password</a>
       </div>
-    </div>  
-    
-    <a class="btn btn-success" href="{% url 'registration_register' %}">Create new account</a>
+      <hr>
+      <a class="btn btn-success" href="{% url 'registration_register' %}">Create a new account</a>
+        
   </form>
+  
 </div> <!-- /container -->
 
 

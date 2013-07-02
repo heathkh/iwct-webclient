@@ -43,11 +43,11 @@ def Workstations(request):
   # get IAM credentials, if needed using root AWS credentials
   if not iam_credentials:
     return HttpResponseRedirect('/setup_credentials') # Redirect after POST
-  if not workstation.IAMUserReady(iam_credentials.iam_key_id, iam_credentials.iam_key_secret):
+
+  try:
+    manager = GetManager(request)
+  except workstation.InvalidAwsCredentials:
     return HttpResponseRedirect('/setup_credentials') # Redirect after POST
-  
-  # fetch the workstation info 
-  manager = GetManager(request)
   instances = manager.ListInstances()
   context = {'instances': instances}
   return render(request, 'workstations.html', context)
@@ -132,9 +132,17 @@ def AddStorage(request, instance_id):
 
 
 class SetupAwsCredentialsForm(forms.Form):
-  aws_key_id = forms.CharField(min_length=20, max_length=20, label='Key ID', help_text='&nbsp; &nbsp; <span style="font-size: 10px; color: gray;">Example Key ID: AKIBJXJDW89GBT46DMGA</span>')
-  aws_key_secret = forms.CharField(min_length=40, max_length=40, label='Key Secret', help_text='&nbsp; &nbsp; <span style="font-size: 10px; color: gray;">Example Key Secret: q73vQ2T5rGe6bcrRTfTXyaZgrdT/53WVdysqLoYx</span>')
+  aws_key_id = forms.CharField(min_length=20, max_length=20, label='', widget=forms.TextInput(attrs={'placeholder':'Key ID', 'size': 20}), help_text='&nbsp; <span style="font-size: 10px; color: gray;">Example: AKIBJXJDW89GBT46DMGA</span>')
+  aws_key_secret = forms.CharField(min_length=40, max_length=40, label='', widget=forms.TextInput(attrs={'placeholder':'Key Secret', 'size': 40}), help_text='&nbsp; <span style="font-size: 10px; color: gray;">Example: q73vQ2T5rGe6bcrRTfTXyaZgrdT/53WVdysqLoYx</span>')
  
+  def clean(self):
+    cleaned_data = super(SetupAwsCredentialsForm, self).clean()
+    aws_key_id = cleaned_data.get("aws_key_id")
+    aws_key_secret = cleaned_data.get("aws_key_secret")
+    if not core.CredentialsValid(aws_key_id, aws_key_secret):
+      raise forms.ValidationError("Invalid AWS Access Key")
+    # Always return the full collection of cleaned data.
+    return cleaned_data
 
 def SetupAwsCredentials(request):
   form = SetupAwsCredentialsForm() # An unbound form
@@ -146,26 +154,25 @@ def SetupAwsCredentials(request):
       # Process the data in form.cleaned_data
       root_aws_id = form.cleaned_data['aws_key_id']
       root_aws_secret = form.cleaned_data['aws_key_secret']
-      try:
-        key_id, key_secret = workstation.InitCirrusIAMUser(root_aws_id, 
-                                                           root_aws_secret)
-      except exception.BotoServerError as e:
-        print e
-        pass
-    
-    if key_id and key_secret:    
-      iam_credentials = models.IamCredentials(user=request.user, 
-                                              iam_key_id=key_id, 
-                                              iam_key_secret=key_secret )      
-      iam_credentials.save()      
-      return HttpResponseRedirect('/workstations') # Redirect after POST
-  
+      key_id, key_secret = workstation.InitCirrusIAMUser(root_aws_id, 
+                                                         root_aws_secret)
+      
+      iam_credentials = models.IamCredentials.objects.get(user=request.user)
+      iam_credentials.iam_key_id = key_id
+      iam_credentials.iam_key_secret = key_secret
+      iam_credentials.save()                  
+      return HttpResponseRedirect('/workstations') # Redirect after POST  
   return render(request, 'setup_credentials.html', {'form': form,})   
 
 
 class CreateWorkstationForm(forms.Form):
-  name = forms.CharField(label="name", max_length=100, min_length = 3, help_text=u'Name you would like to use for your new workstation.',)
+  name = forms.CharField(label=" ",
+                         max_length=100,
+                         min_length = 3,
+                         widget=forms.TextInput(attrs={'placeholder': 'workstation name' }), 
+                         help_text=u'Name for the new workstation.',)
   INSTANCE_TYPE_CHOICES = (
+    ('c1.medium', 'c1.medium'),
     ('c1.xlarge', 'c1.xlarge'),  
   )
   instance_type = forms.ChoiceField(choices=INSTANCE_TYPE_CHOICES)
@@ -192,7 +199,8 @@ class CreateWorkstationRunner():
  
   
 def CreateWorkstation(request):
-  form = CreateWorkstationForm(initial={'name': 'my_workstation', 'instance_type': 'c1.xlarge'}) # An unbound form
+  #form = CreateWorkstationForm(initial={'name': 'my_workstation', 'instance_type': 'c1.xlarge'}) # An unbound form
+  form = CreateWorkstationForm() # An unbound form
   
   if request.method == 'POST': # If the form has been submitted...
     form = CreateWorkstationForm(request.POST) # A form bound to the POST data
