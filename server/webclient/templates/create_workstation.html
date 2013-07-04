@@ -3,14 +3,9 @@
 {% load bootstrap_toolkit %}
 
 {% block extra_head %}
-	
-	
-
 {%endblock%}
 
-
 {% block content %}
-
 <form id="target" action="{% url 'create_workstation' %}" method="post">
 {% csrf_token %}
 <h2 class="form-signin-heading">Configure your new workstation</h2>

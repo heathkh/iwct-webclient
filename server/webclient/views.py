@@ -16,7 +16,7 @@ worker_pool = None
 def GetWorkerPool():
   global worker_pool
   if not worker_pool:
-    worker_pool = multiprocessing.Pool(processes=4)  # start 4 worker processes
+    worker_pool = multiprocessing.Pool(processes=20)  # start worker processes
   return worker_pool
 
 def GetManager(request):
