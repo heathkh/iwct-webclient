@@ -4,20 +4,20 @@ from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django import forms
 from django.http import HttpResponseRedirect
-import multiprocessing
+#import multiprocessing
 from cirruscluster import core
 from cirruscluster import workstation
 
 import models
 from boto import exception
 
-worker_pool = None
-
-def GetWorkerPool():
-  global worker_pool
-  if not worker_pool:
-    worker_pool = multiprocessing.Pool(processes=20)  # start worker processes
-  return worker_pool
+#worker_pool = None
+#
+#def GetWorkerPool():
+#  global worker_pool
+#  if not worker_pool:
+#    worker_pool = multiprocessing.Pool(processes=20)  # start worker processes
+#  return worker_pool
 
 def GetManager(request):
   iam_credentials = request.user.iamcredentials
@@ -215,15 +215,14 @@ def CreateWorkstation(request):
       manager = GetManager(request)
       ubuntu_release_name = 'precise'
       mapr_version = 'v2.1.3'
-      runner = CreateWorkstationRunner(manager, 
-                                       name, 
-                                       instance_type,
-                                       ubuntu_release_name, 
-                                       mapr_version,
-                                       core.default_ami_release_name, 
-                                       core.default_ami_owner_id)
-      GetWorkerPool().apply_async(runner)
-      messages.success(request, 'Your new workstation (%s) is starting up...' % (name))
+      
+      messages.success(request, 'Your new workstation "%s" is starting up...' % (name))
+      manager.CreateInstance(name, 
+                             instance_type,
+                             ubuntu_release_name, 
+                             mapr_version,
+                             core.default_ami_release_name, 
+                             core.default_ami_owner_id)
       return HttpResponseRedirect('/workstations/') # Redirect after POST
   
   return render(request, 'create_workstation.html', {'form': form,})      
