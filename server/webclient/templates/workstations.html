@@ -17,18 +17,27 @@
 }
 </style>
 
+
+<script src="{{ STATIC_URL }}/js/jquery.fileDownload.js" type="text/javascript"></script>
+
 <script>
-function CopyToClipboard (text) {
-  window.prompt ("Copy to clipboard: Ctrl+C, Enter", text);
-}
 
 function Load(url){
   window.location.href = url;
 }
 
+function Download(url){
+  ShowWaitDialog();
+  console.log(url);
+  $.fileDownload(url, {
+      successCallback: function(url) { console.log('success'); HideWaitDialog(); },
+      failCallback: function(responseHtml, url) { console.log('fail'); HideWaitDialog(); }
+                       });
+  return false; //this is critical to stop the click event which will trigger a normal file download!
+}
 
-function WaitMessage(message){
-  $('#myModal').modal({show: true})
+function CopyToClipboard (text) {
+  window.prompt ("Copy to clipboard: Ctrl+C, Enter", text);
 }
 
 function timedRefresh(timeoutPeriod) {
@@ -36,7 +45,6 @@ function timedRefresh(timeoutPeriod) {
 }
 
 timedRefresh(30000)
-
 
 function OpenNxClientInstallWindow(){
 	var OSName="Unknown OS";
@@ -47,7 +55,7 @@ function OpenNxClientInstallWindow(){
 	// Default points at generic download page
 	var install_nx_client_url = "http://www.nomachine.com/download.php";
 	if (OSName == "Windows") {
-	  install_nx_client_url = "http://www.nomachine.com/download-package.php?Prod_Id=3835"
+	  install_nx_client_url = "http://www.nomachine.com/down-package.php?Prod_Id=3835"
 	}
 	else if (OSName == "MacOS") {
 	  install_nx_client_url = "http://www.nomachine.com/download-package.php?Prod_Id=3834"
@@ -57,20 +65,30 @@ function OpenNxClientInstallWindow(){
 	}
   window.open(install_nx_client_url);
 }
-
-
 </script>
+
+
 {% endblock %}
 
 {% block content %}
 
- 
-<!-- Modal -->
-<div id="myModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+
+<div id="connect_dialog" class="modal hide fade">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+    <h3>Starting Session</h3>
+  </div>
   <div class="modal-body">
-    <p>Waiting...</p>
+    <p>
+     <b>Tip:</b> open the downloaded nx session file (.nxs) with NX Client. &nbsp;
+      <a class="btn btn-info btn-mini pull-right" href="#" onclick="OpenNxClientInstallWindow()">Get NX Client &raquo;</a>
+   </p>
+  </div>
+  <div class="modal-footer">
+    <a href="#" class="btn btn-primary">Ok</a>
   </div>
 </div>
+
 
 <div class="container">
 	<div class="row">
@@ -106,7 +124,10 @@ function OpenNxClientInstallWindow(){
 			  <td>
 			    {% if instance.state == "running" %}
 			  	<div class="btn-group">
-						<button class="btn" onclick="Load('/connect/{{instance.id}}')"><i class="icon-black icon-share-alt"></i> Connect</button>						
+						<!-- <button class="btn" onclick=" $('#connect_dialog').modal('show'); Load('/connect/{{instance.id}}'); $('#connect_dialog').modal('hide');"><i class="icon-black icon-share-alt"></i> Connect</button>
+						-->
+						<button class="btn" onclick="Download('/connect/{{instance.id}}');"><i class="icon-black icon-share-alt"></i> Connect</button>
+						
 					</div>
 					{% endif %}			  
 			  </td>          
@@ -132,7 +153,7 @@ function OpenNxClientInstallWindow(){
 			</tbody>
 		</table>
 		<div class="alert alert-info">
-      <b>Tip:</b> After clicking "connect", open the downloaded .nxs file with NX Client. &nbsp;
+      <b>Tip:</b> After clicking "connect", open the downloaded nx session file (.nxs) with NX Client. &nbsp;
       <a class="btn btn-info btn-mini pull-right" href="#" onclick="OpenNxClientInstallWindow()">Get NX Client &raquo;</a>      
     </div>		    
 	  </div> <!-- span8 -->	
@@ -142,6 +163,7 @@ function OpenNxClientInstallWindow(){
     </div>
 	</div>
 </div> <!-- container -->
+
 
 
 {% endblock %}

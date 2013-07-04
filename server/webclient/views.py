@@ -77,7 +77,8 @@ def Connect(request, instance_id):
   safe_name = safe_name.replace('_', '-')
   safe_name = safe_name.replace('=', '-')
   safe_name = safe_name.replace(',', '-')
-  response['Content-Disposition'] = 'attachment; filename="%s.nxs"' % (safe_name)  
+  response['Content-Disposition'] = 'attachment; filename="%s.nxs"' % (safe_name)
+  response.set_cookie('fileDownload', 'true')  
   return response
 
 
@@ -156,7 +157,7 @@ def SetupAwsCredentials(request):
       # Process the data in form.cleaned_data
       root_aws_id = form.cleaned_data['aws_key_id']
       root_aws_secret = form.cleaned_data['aws_key_secret']
-      key_id, key_secret = workstation.InitCirrusIAMUser(root_aws_id, 
+      key_id, key_secret = workstation.GetCirrusIamUserCredentials(root_aws_id, 
                                                          root_aws_secret)
       
       #iam_credentials = models.IamCredentials.objects.get(user=request.user)
