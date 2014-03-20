@@ -4,3 +4,4 @@ south>=0.8
 cirruscluster
 django-bootstrap-toolkit
 mysql-python
+newrelic
