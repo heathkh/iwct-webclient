@@ -15,6 +15,12 @@ framework.
 """
 import os
 
+
+import newrelic.agent
+config_file = os.environ.get('NEW_RELIC_CONFIG_FILE')
+environment = os.environ.get('NEW_RELIC_ENVIRONMENT')
+newrelic.agent.initialize(config_file, environment)
+
 # We defer to a DJANGO_SETTINGS_MODULE already in the environment. This breaks
 # if running multiple sites in the same mod_wsgi process. To fix this, use
 # mod_wsgi daemon mode with each site in its own daemon process, or use
